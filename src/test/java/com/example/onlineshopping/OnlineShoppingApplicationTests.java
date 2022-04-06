@@ -9,14 +9,9 @@ import org.springframework.context.ApplicationContext;
 
 @SpringBootTest
 class OnlineShoppingApplicationTests {
-
-
-    @Autowired
-    ApplicationContext javaConfigContext;
     @Test
     void contextLoads() {
-        OrderService orderService= javaConfigContext.getBean(OrderService.class);
-        Assertions.assertNotNull(orderService);
+
     }
 
 

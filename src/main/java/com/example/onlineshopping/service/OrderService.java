@@ -25,11 +25,7 @@ public class OrderService {
     @Autowired
     UserRepositoryImpl userRepository;
 
-    public OrderService(ItemsRepositoryImpl itemsRepository, OrderRepositoryImpl orderRepository, UserRepositoryImpl userRepository) {
-        this.itemsRepository = itemsRepository;
-        this.orderRepository = orderRepository;
-        this.userRepository = userRepository;
-    }
+
 
     public List<Items> getAllItems() {
        log.info("Get all items method called");
