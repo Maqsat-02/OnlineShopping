@@ -71,7 +71,7 @@ class OrderServiceTests {
     @SneakyThrows
     @Test
     void testGetItemById() {
-        Items items = new Items(1, "Name", 1L, "Category");
+        Items items = new Items(1, "IPHONE X 256GB", 485990, "Smartphones");
 
         when(this.itemsRepository.getItemById(anyInt())).thenReturn(Optional.of(items));
 
@@ -127,8 +127,8 @@ class OrderServiceTests {
 
     @Test
     void testOrderStatus() {
-        when(this.orderRepository.orderStatus(anyInt())).thenReturn("Order Status");
-        assertEquals("Order Status", this.orderService.orderStatus(2));
+        when(this.orderRepository.orderStatus(anyInt())).thenReturn("Please, pay first for order!!");
+        assertEquals("Please, pay first for order!!", this.orderService.orderStatus(2));
         verify(this.orderRepository).orderStatus(anyInt());
     }
 
