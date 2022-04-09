@@ -1,41 +1,52 @@
 package com.example.onlineshopping.repository;
 
+import com.example.onlineshopping.model.Items;
 import com.example.onlineshopping.model.Order;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Primary
 @Repository
-public class OrderRepositoryImpl implements OrderRepository, InitializingBean {
-    List<Order> orderList;
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        orderList=Order.getOrders();
-    }
+public class OrderRepositoryImpl implements OrderRepository{
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     @Override
     public List<Order> getAllOrders() {
-        return orderList;
+        return new ArrayList<>( jdbcTemplate.query("select * from `order`",new BeanPropertyRowMapper<>(Order.class)));
     }
 
     @Override
     public Optional<Order> getOrderById(int id) {
-        return orderList.stream().filter(x->x.getId()==id).findFirst();
+        return Optional.of(jdbcTemplate.queryForObject("select * from `order` where id=?",new Object[]{id},new BeanPropertyRowMapper<>(Order.class)));
     }
 
     @Override
     public boolean saveOrder(Order order) {
-        return orderList.add(order);
+        try {
+            jdbcTemplate.update(
+                    "insert into `order`  values(?,?,?,?,?,?)",
+                   order.getId(),order.getOrderDate(),order.getTotalPrice(),order.isPaid(),order.isDelivered(),order.getUser().getId());
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @Override
     public boolean deleteOrderById(int id) {
         try {
-            orderList.remove(getOrderById(id));
+            jdbcTemplate.update(
+                    "delete from `order` where id = ?", id);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

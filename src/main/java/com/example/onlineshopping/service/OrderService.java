@@ -31,7 +31,7 @@ public class OrderService {
        log.info("Get all items method called");
        return itemsRepository.getAllItems();
    }
-    public Items getItemById(int id) throws ClassNotFoundException {
+    public Items getItemById(int id) {
         log.info("Get item by id:{} method called",id);
        return itemsRepository.getItemById(id).orElse(null);
    }
@@ -80,10 +80,10 @@ public class OrderService {
         log.info("Delete user by id:{} method called",id);
         return userRepository.deleteUserById(id);
     }
-    boolean payForOrder(int userId){
-        log.info("Paying for order of userId:{} method called",userId);
-        Order order = getAllOrders().stream().filter(x->x.getUser().getId()==userId).findAny().
-                orElseThrow(Error::new);
+    public boolean payForOrder(Order order){
+//        log.info("Paying for order of userId:{} method called",userId);
+//        Order order = getAllOrders().stream().filter(x->x.getUser().getId()==userId).findAny().
+//                orElseThrow(Error::new);
         return userRepository.payForOrder(order);
     }
 
