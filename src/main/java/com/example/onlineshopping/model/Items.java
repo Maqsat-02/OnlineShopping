@@ -1,64 +1,52 @@
 package com.example.onlineshopping.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
 //import java.util.Arrays;
 //import java.util.List;
 
-@Data
+
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @Builder
-@Component
-public class Items {
-    int id;
-    String name;
-    long price;
-    String category;
+@Entity
+@Table(name = "items",schema = "one_lab_db")
+public class Items implements Serializable {
 
-    public static List<Items> getItems() {
-        Items items1 = Items.builder()
-                .id(1)
-                .name("IPHONE X 256GB")
-                .price(485990)
-                .category("Smartphones")
-                .build();
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private int id;
 
-        Items items2 = Items.builder()
-                .id(2)
-                .name("SAMSUNG GALAXY S8 64GB")
-                .price(253990)
-                .category("Smartphones")
-                .build();
+    @Column(name = "name", length = 50)
+    private String name;
 
-        Items items3 = Items.builder()
-                .id(3)
-                .name("IPHONE 7 128GB SILVER 256GB")
-                .price(279990)
-                .category("Smartphones")
-                .build();
+    @Column(name = "price")
+    private long price;
 
-        Items items4 = Items.builder()
-                .id(4)
-                .name("XIAOMI REDMI NOTE 3 32GB")
-                .price(105990)
-                .category("Smartphones")
-                .build();
+    @Column(name = "category", length = 20)
+    private String category;
 
-        Items items5 = Items.builder()
-                .id(5)
-                .name("Samsung Galaxy Note 8 64GB")
-                .price(349990)
-                .category("Smartphones")
-                .build();
 
-        return Arrays.asList(items1,items2,items3,items4,items5);
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "orderId")
+    private Order orderId;
+
+    @Override
+    public String toString() {
+        return "Items{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", category='" + category + '\'' +
+                '}';
     }
 }

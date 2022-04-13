@@ -1,14 +1,12 @@
-drop table if exists orderr;
-drop table if exists items;
-drop table if exists user;
-create table `users`(
+
+create table if not exists`users` (
                      id INTEGER AUTO_INCREMENT,
                      fullName VARCHAR(100),
                      address VARCHAR(50),
                      balance LONG,
                      PRIMARY KEY(id)
 );
-create table `order`(
+create table if not exists`order`(
                        id int AUTO_INCREMENT NOT NULL  ,
                        orderDate TIMESTAMP ,
                        totalPrice long,
@@ -18,7 +16,7 @@ create table `order`(
                        PRIMARY KEY(id),
                        FOREIGN KEY(userId) references  `users`(id) ON DELETE RESTRICT
 );
-create table items(
+create table if not exists items(
                       id int AUTO_INCREMENT NOT NULL ,
                       name varchar(50),
                       price long,

@@ -17,11 +17,11 @@ public class OnlineShoppingApplication {
         ApplicationContext context=SpringApplication.run(OnlineShoppingApplication.class, args);
 //        ApplicationContext ctx = new AnnotationConfigApplicationContext();
         OrderService orderService = context.getBean("orderService",OrderService.class);
-        Order order= orderService.getOrderById(1);
+        Order order= orderService.getOrderById(1).get();
         System.out.println(order);
-        System.out.println(orderService.orderStatus(2));
+//        System.out.println(orderService.orderStatus(2));
         System.out.println(orderService.getAllOrders().size());
-        User user= orderService.getUserById(1);
+        User user= orderService.getUserById(1).get();
         order.setId(14);
         order.setUser(user);
         System.out.println(orderService.saveOrder(order));

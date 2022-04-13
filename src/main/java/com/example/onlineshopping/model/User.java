@@ -1,47 +1,46 @@
 package com.example.onlineshopping.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @Builder
-@Component
-public class User {
-    int id;
-    String fullName;
-    String address;
-    long balance;
+@Entity
+@Table(name = "`users`",schema = "one_lab_db")
+public class User implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Integer id;
 
-    public static List<User> getUsers() {
-        User user1 = User.builder()
-                .id(1)
-                .fullName("Erkin Jumaliev")
-                .address("st. Abdirova 123")
-                .balance(500000)
-                .build();
+    @Column(name = "fullName")
+    private String fullName;
 
-        User user2 = User.builder()
-                .id(2)
-                .fullName("Dias Uliashev")
-                .address("st. Abay 243")
-                .balance(300000)
-                .build();
+    @Column(name = "address")
+    private String address;
 
-        User user3 = User.builder()
-                .id(3)
-                .fullName("Serik Ospanov")
-                .address("st. Aitiev 123")
-                .balance(100000)
-                .build();
+    @Column(name = "balance")
+    private Long balance;
 
-        return Arrays.asList(user1,user2,user3);
+    @OneToOne(mappedBy = "user")
+    private Order order;
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", fullName='" + fullName + '\'' +
+                ", address='" + address + '\'' +
+                ", balance=" + balance +
+                '}';
     }
 }

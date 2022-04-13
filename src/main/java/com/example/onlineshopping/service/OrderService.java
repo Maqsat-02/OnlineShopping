@@ -1,8 +1,8 @@
 package com.example.onlineshopping.service;
 
-import com.example.onlineshopping.repository.ItemsRepositoryImpl;
-import com.example.onlineshopping.repository.OrderRepositoryImpl;
-import com.example.onlineshopping.repository.UserRepositoryImpl;
+import com.example.onlineshopping.repository.ItemsRepository;
+import com.example.onlineshopping.repository.OrderRepository;
+import com.example.onlineshopping.repository.UserRepository;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.example.onlineshopping.model.Items;
@@ -10,81 +10,125 @@ import com.example.onlineshopping.model.Order;
 import com.example.onlineshopping.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 
+import java.sql.SQLException;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Slf4j
 @Service("orderService")
 @NoArgsConstructor
 public class OrderService {
-    @Autowired
-    ItemsRepositoryImpl itemsRepository;
-    @Autowired
-    OrderRepositoryImpl orderRepository;
-    @Autowired
-    UserRepositoryImpl userRepository;
 
+    ItemsRepository itemsRepository;
 
+    OrderRepository orderRepository;
 
+    UserRepository userRepository;
+
+    @Autowired
+    public OrderService(ItemsRepository itemsRepository, OrderRepository orderRepository, UserRepository userRepository) {
+        this.itemsRepository = itemsRepository;
+        this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
+    }
+    @Transactional(readOnly = true)
     public List<Items> getAllItems() {
-       log.info("Get all items method called");
-       return itemsRepository.getAllItems();
+       return itemsRepository.findAll();
    }
-    public Items getItemById(int id) {
-        log.info("Get item by id:{} method called",id);
-       return itemsRepository.getItemById(id).orElse(null);
+    @Transactional(readOnly = true)
+    public Optional<Items> getItemById(int id) {
+       return itemsRepository.findById(id);
    }
-    public boolean saveItem(Items item) {
-        log.info("Save item:{} method called",item);
-        return itemsRepository.saveItem(item);
-   }
+    @Transactional( propagation = Propagation.SUPPORTS,rollbackFor = SQLException.class)
+    public Items saveItem(Items item) {
+        return itemsRepository.saveAndFlush(item);
+    }
+    @Transactional( propagation = Propagation.SUPPORTS,rollbackFor = SQLException.class)
     public boolean deleteItemById(int id) {
-        log.info("Delete item by id:{} method called",id);
-        return itemsRepository.deleteItemById(id);
+        try {
+            itemsRepository.deleteById(id);
+            return true;
+        } catch (Exception e) {
+            log.error("Error while deleting with id  {}",id);
+            e.printStackTrace();
+        }
+        return false;
     }
-
+    @Transactional(readOnly = true)
     public List<Order> getAllOrders() {
-        log.info("Get all orders method called");
-        return  orderRepository.getAllOrders();
+        return  orderRepository.findAll();
    }
-    public Order getOrderById(int id) {
-        log.info("Get order by id:{} method called",id);
-        return orderRepository.getOrderById(id).orElse(null);
+    @Transactional(readOnly = true)
+    public Optional<Order> getOrderById(int id) {
+        return orderRepository.findById(id);
    }
-    public boolean saveOrder(Order order) {
-        log.info("Save item:{} method called",order);
-        return orderRepository.saveOrder(order);
+    @Transactional( propagation = Propagation.SUPPORTS,rollbackFor = SQLException.class)
+    public Order saveOrder(Order order) {
+        return orderRepository.saveAndFlush(order);
    }
+    @Transactional( propagation = Propagation.SUPPORTS,rollbackFor = SQLException.class)
     public boolean deleteOrderById(int id){
-        log.info("Delete item by id:{} method called",id);
-        return orderRepository.deleteOrderById(id);
+        try {
+            orderRepository.deleteById(id);
+            return true;
+        } catch (Exception e) {
+            log.error("Error while deleting Order with id  {}",id);
+            e.printStackTrace();
+        }
+        return false;
     }
-    public String orderStatus(int id) {
-        log.info("Order status of order by id:{} method called",id);
-        return  orderRepository.orderStatus(id);
+    @Transactional( propagation = Propagation.SUPPORTS,readOnly = true )
+    public String orderStatus(Order order) {
+//        Order order= orderRepository.getById(id);
+        if(order.getIsPaid() && order.getIsDelivered()) {
+            return "Your order was delivered!!";
+        }
+        else if(!order.getIsDelivered()){
+            return "Please wait delivery!";
+        }
+        else
+            return "Please, pay first for order!!";
     }
+    @Transactional(readOnly = true)
     public List<User> getAllUsers() {
-        log.info("Get all users method called");
-        return userRepository.getAllUsers();
+        return userRepository.findAll();
     }
-    public User getUserById(int id){
-        log.info("Get user by id:{} method called",id);
-        return  userRepository.getUserById(id).orElse(null);
+    @Transactional(readOnly = true)
+    public Optional<User> getUserById(int id){
+        return  userRepository.findById(id);
     }
-    public boolean saveUser(User user){
-        log.info("Save user:{} method called",user);
-        return  userRepository.saveUser(user);
+    @Transactional( propagation = Propagation.SUPPORTS,rollbackFor = SQLException.class)
+    public User saveUser(User user){
+        return userRepository.saveAndFlush(user);
+
     }
+    @Transactional( propagation = Propagation.SUPPORTS,rollbackFor = SQLException.class)
     public boolean deleteUserById(int id){
-        log.info("Delete user by id:{} method called",id);
-        return userRepository.deleteUserById(id);
+        try {
+            userRepository.deleteById(id);
+            return true;
+        } catch (Exception e) {
+            log.error("Error while deleting User with id  {}",id);
+            e.printStackTrace();
+        }
+        return false;
     }
     public boolean payForOrder(Order order){
-//        log.info("Paying for order of userId:{} method called",userId);
-//        Order order = getAllOrders().stream().filter(x->x.getUser().getId()==userId).findAny().
-//                orElseThrow(Error::new);
-        return userRepository.payForOrder(order);
+
+        if(order.getTotalPrice()>order.getUser().getBalance())
+            return false;
+        else {
+            order.setIsPaid(true);
+            orderRepository.save(order);
+            order.getUser().setBalance(order.getUser().getBalance()-order.getTotalPrice());
+            userRepository.save(order.getUser());
+            return true;
+        }
     }
 
 }
