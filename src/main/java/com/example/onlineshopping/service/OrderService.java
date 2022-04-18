@@ -1,5 +1,6 @@
 package com.example.onlineshopping.service;
 
+import com.example.onlineshopping.kafka.KafkaProducer;
 import com.example.onlineshopping.repository.ItemsRepository;
 import com.example.onlineshopping.repository.OrderRepository;
 import com.example.onlineshopping.repository.UserRepository;
@@ -29,6 +30,9 @@ public class OrderService {
     OrderRepository orderRepository;
 
     UserRepository userRepository;
+
+    @Autowired
+    KafkaProducer kafkaProducer;
 
     @Autowired
     public OrderService(ItemsRepository itemsRepository, OrderRepository orderRepository, UserRepository userRepository) {
@@ -124,11 +128,15 @@ public class OrderService {
             return false;
         else {
             order.setIsPaid(true);
-            orderRepository.save(order);
             order.getUser().setBalance(order.getUser().getBalance()-order.getTotalPrice());
-            userRepository.save(order.getUser());
+            orderRepository.save(order);
+            //            userRepository.save(order.getUser());
             return true;
         }
+    }
+
+    public String kafkaProduceMsg(Order message){
+        return kafkaProducer.sendMessage(message);
     }
 
 }

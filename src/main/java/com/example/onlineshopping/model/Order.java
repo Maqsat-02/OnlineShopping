@@ -1,5 +1,11 @@
 package com.example.onlineshopping.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.*;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +24,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "`order`",schema = "one_lab_db")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class Order implements Serializable {
 
     @Id
@@ -26,6 +35,8 @@ public class Order implements Serializable {
     private Integer id;
 
     @Column(name = "orderDate", columnDefinition = "TIMESTAMP")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime orderDate;
 
     @Column(name = "totalPrice")

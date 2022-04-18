@@ -1,81 +1,45 @@
-package com.example.onlineshopping;
+package com.example.onlineshopping.service;
 
-import com.example.onlineshopping.Config.DBconfig;
 import com.example.onlineshopping.model.Items;
 import com.example.onlineshopping.model.Order;
 import com.example.onlineshopping.model.User;
 import com.example.onlineshopping.repository.ItemsRepository;
 import com.example.onlineshopping.repository.OrderRepository;
 import com.example.onlineshopping.repository.UserRepository;
-import com.example.onlineshopping.service.OrderService;
-
-import org.aspectj.lang.annotation.Before;
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.event.annotation.BeforeTestClass;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
+import org.slf4j.Logger;
 
-
-import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-
-@ExtendWith(SpringExtension.class)
-//@ExtendWith(MockitoExtension.class)
-@ContextConfiguration(classes = {OrderService.class,DBconfig.class})
-public class OrderServiceTest {
-
-    @MockBean
-    private  ItemsRepository itemsRepository;
-
-    @MockBean
-    private  OrderRepository orderRepository;
-
-    @MockBean
-    private  UserRepository userRepository;
-
+//@SpringJUnitConfig(AOPconfig.class)
+class OrderServiceTest {
+    @Mock
+    ItemsRepository itemsRepository;
+    @Mock
+    OrderRepository orderRepository;
+    @Mock
+    UserRepository userRepository;
+    @Mock
+    Logger log;
     @InjectMocks
-    private OrderService orderService;
+    OrderService orderService;
 
     @BeforeEach
-    public void init() {
-
+    void setUp() {
         MockitoAnnotations.openMocks(this);
-        orderService= new OrderService(itemsRepository,orderRepository,userRepository);
     }
 
     @Test
@@ -189,18 +153,29 @@ public class OrderServiceTest {
     void testOrderStatus(){
         User user = new User(123, "Dr Jane Doe", "42 Main St", 42L,null);
         Order order = new Order(478, LocalDateTime.now(),8L,true,false,user,null);
-        when(orderService.orderStatus(order)).thenReturn("Please wait delivery!");
-        orderService.orderStatus(order);
-  //      Assertions.assertEquals( orderService.orderStatus(3),"Please wait delivery!");
+//        when(orderService.orderStatus(order)).thenReturn("Please wait delivery!");
+//        orderService.orderStatus(order);
+        Assertions.assertEquals( orderService.orderStatus(order),"Please wait delivery!");
     }
-    @Test
-    void testPayForOrder(){
-        User user = new User(123, "Dr Jane Doe", "42 Main St", 42L,null);
-        Order order = new Order(478, LocalDateTime.now(),8L,true,false,user,null);
-        user.setOrder(order);
-        when(orderService.payForOrder(order)).thenReturn(true);
-        orderService.payForOrder(order);
+//    @Test
+//    void testPayForOrder(){
+//        User user = new User(123, "Dr Jane Doe", "42 Main St", 42L,null);
+//        Order order = new Order(478, LocalDateTime.now(),8L,true,false,user,null);
+//        user.setOrder(order);
+//        when(orderService.payForOrder(order)).thenReturn(true);
+//        orderService.payForOrder(order);
 //        Assertions.assertTrue(orderService.saveOrder(order));
 //        Assertions.assertTrue(orderService.payForOrder(order));
+//    }
+    @Test
+    public void testProducerMSG(){
+        User user = new User(1, "Erkin Jumaliev", "st. Abdirova 123", 500000L,null);
+        Order order = new Order(1, LocalDateTime.now(),8L,false,false,user,null);
+        user.setOrder(order);
+        when(orderService.kafkaProduceMsg(order)).thenReturn("json message sent successfully");
+        orderService.payForOrder(order);
+        Assertions.assertNotNull(orderService.kafkaProduceMsg(order));
     }
 }
+
+//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme

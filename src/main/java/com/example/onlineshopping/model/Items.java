@@ -30,7 +30,7 @@ public class Items implements Serializable {
     private String name;
 
     @Column(name = "price")
-    private long price;
+    private Long price;
 
     @Column(name = "category", length = 20)
     private String category;

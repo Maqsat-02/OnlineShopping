@@ -15,7 +15,6 @@ public class OnlineShoppingApplication {
 
     public static void main(String[] args) {
         ApplicationContext context=SpringApplication.run(OnlineShoppingApplication.class, args);
-//        ApplicationContext ctx = new AnnotationConfigApplicationContext();
         OrderService orderService = context.getBean("orderService",OrderService.class);
         Order order= orderService.getOrderById(1).get();
         System.out.println(order);
@@ -26,8 +25,8 @@ public class OnlineShoppingApplication {
         order.setUser(user);
         System.out.println(orderService.saveOrder(order));
         System.out.println(orderService.getAllOrders().size());
-
-
+        orderService.kafkaProduceMsg(orderService.getOrderById(1).get());
+        System.out.println(orderService.getOrderById(2));
     }
 
 }
